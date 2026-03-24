@@ -14,6 +14,10 @@ class OperationalArrayABC(metaclass=ABCMeta):
     """Abstract base class for every concept that can do computations.
     Defines all properties and methods that subclasses should have"""
 
+    dimension_sizes: dict[OADimension, int]
+    total_unit_count: int
+    area: float
+
     def __init__(self, dimension_sizes: dict[OADimension, int]):
         self.dimension_sizes = dimension_sizes
         self.total_unit_count: int
@@ -21,6 +25,8 @@ class OperationalArrayABC(metaclass=ABCMeta):
 
 class OperationalArray(OperationalArrayABC):
     """! This class captures multi-dimensional operational array size."""
+
+    area: float
 
     def __init__(self, operational_unit: OperationalUnit, dimension_sizes: dict[OADimension, int]):
         """
@@ -31,7 +37,7 @@ class OperationalArray(OperationalArrayABC):
         OperationalArrayABC.__init__(self, dimension_sizes=dimension_sizes)
         self.unit: OperationalUnit = operational_unit
         self.total_unit_count = int(math.prod(list(dimension_sizes.values())))
-        self.total_area = operational_unit.area * self.total_unit_count
+        self.area = operational_unit.area * self.total_unit_count
 
     def __jsonrepr__(self):
         return json_repr_handler({"operational_unit": self.unit, "dimensions": self.dimension_sizes})

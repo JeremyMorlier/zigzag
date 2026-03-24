@@ -95,6 +95,13 @@ class Accelerator:
     def get_memory_bw_min_dict(self):
         return self.mem_r_bw_min_dict, self.mem_w_bw_min_dict
 
+    def get_area(self) -> float:
+        """! Get the total area of this accelerator by summing the area of the operational array and all memory instances."""
+        area: float = self.operational_array.area
+        for mem_lv in self.memory_hierarchy.topological_sort():
+            area += mem_lv.memory_instance.area * mem_lv.unroll_count
+        return area
+
     def __str__(self) -> str:
         return f"Core({self.id})"
 

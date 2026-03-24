@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Iterator
 from itertools import product
 from typing import Any
 
@@ -12,6 +13,7 @@ from zigzag.workload.dnn_workload import DNNWorkload
 from zigzag.workload.layer_node import LayerNode
 
 logger = logging.getLogger(__name__)
+plt: Any = plt
 
 
 class HardwareOptimizerStage(Stage):
@@ -62,7 +64,7 @@ class HardwareOptimizerStage(Stage):
                 **self.kwargs,
             )
 
-            for cumulative_cme, extra_info in substage.run():
+            for _, extra_info in substage.run():
                 cme = extra_info[0][0]
                 assert isinstance(cme, CostModelEvaluationABC)
                 if (
@@ -84,7 +86,7 @@ class HardwareOptimizerStage(Stage):
         assert best_cme is not None
         yield best_cme, [(best_cme, best_idx)]
 
-    def _accelerator_and_workload_iterator(self) -> list[tuple[str, DNNWorkload, int]]:
+    def _accelerator_and_workload_iterator(self) -> Iterator[tuple[str, DNNWorkload, int]]:
         """Iterate through different hardware configurations and update the workload spatial unrolling."""
         # First, assert that the accelerator yaml name is gemm_l1_l3
         assert "gemm_l1_l3" in self.accelerator, "HardwareOptimizerStage only supports gemm_l1_l3 accelerator."

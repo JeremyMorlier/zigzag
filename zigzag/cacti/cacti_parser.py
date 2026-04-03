@@ -223,6 +223,10 @@ class CactiParser:
                         area,
                     )
                     return read_cost, write_cost, area
+        else:
+            raise ValueError(
+                f"Memory pool is empty. No match in Cacti memory pool found {size=}, {r_bw=}, {r_port=}, {w_port=}, {rw_port=}, {bank=}"
+            )
 
         # should be never reached
         raise ModuleNotFoundError(

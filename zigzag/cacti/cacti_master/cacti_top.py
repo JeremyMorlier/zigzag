@@ -30,7 +30,7 @@ def run_cacti(
     self_gen_path = os.path.join(cacti_master_path, self_gen_folder_name)
     if not os.path.isdir(self_gen_path):
         os.mkdir(self_gen_path)
-
+    print(self_gen_path)
     os.system(f"rm -rf {self_gen_path}/*")
     config = CactiConfig()
 

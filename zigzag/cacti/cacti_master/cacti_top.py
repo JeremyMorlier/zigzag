@@ -25,7 +25,8 @@ def run_cacti(
     cacti_master_path = os.path.dirname(mem_pool_path)
     print(f"{cacti_master_path=}")
 
-    self_gen_folder_name = "self_gen"
+    # Isolate intermediate CACTI artifacts per process to avoid collisions.
+    self_gen_folder_name = f"self_gen_{os.getpid()}"
     self_gen_path = os.path.join(cacti_master_path, self_gen_folder_name)
     if not os.path.isdir(self_gen_path):
         os.mkdir(self_gen_path)

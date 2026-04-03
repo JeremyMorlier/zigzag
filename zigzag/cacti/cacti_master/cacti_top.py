@@ -1,4 +1,5 @@
 import argparse
+import fcntl
 import os
 import sys
 from typing import Any
@@ -88,7 +89,7 @@ def run_cacti(
 
     if not os.path.isfile(f"{self_gen_path}/cache.cfg.out"):
         raise FileNotFoundError(
-            f"CACTI output file {self_gen_path}/cache.cfg.out not found! " "Manually check CACTI inputs."
+            f"CACTI output file {self_gen_path}/cache.cfg.out not found! Manually check CACTI inputs."
         )
 
     result: dict[str, Any] = {}
@@ -137,7 +138,6 @@ def run_cacti(
             + "_TECH_"
             + str(technology)
         )
-
         new_result = {
             "%s"  # pylint: disable=C0209
             % mem_name: {
@@ -155,8 +155,12 @@ def run_cacti(
             }
         }
         with open(mem_pool_path, "a+", encoding="UTF-8") as fp:
-            yaml.dump(new_result, fp)
-            fp.write("\n")
+            fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
+            try:
+                yaml.dump(new_result, fp)
+                fp.write("\n")
+            finally:
+                fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
 
 
 if __name__ == "__main__":

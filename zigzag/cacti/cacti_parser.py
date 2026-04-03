@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import fcntl
 from typing import Any
 
 import yaml
@@ -22,6 +23,15 @@ class CactiParser:
         """"""
         pass
 
+    def _load_memory_pool(self, mem_pool_path: str) -> None | dict[str, dict[str, Any]]:
+        """Load the CACTI memory pool under a shared lock so readers block on writers."""
+        with open(mem_pool_path, "r", encoding="UTF-8") as fp:
+            fcntl.flock(fp.fileno(), fcntl.LOCK_SH)
+            try:
+                return yaml.full_load(fp)
+            finally:
+                fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+
     def item_exists(
         self,
         size: int,
@@ -37,8 +47,7 @@ class CactiParser:
         @param mem_pool_path  Path to cached cacti simulated memories
         @return Return wether the requested memory item has been simulated before.
         """
-        with open(mem_pool_path, "r") as fp:  # pylint: disable=W1514
-            memory_pool: None | dict[str, dict[str, Any]] = yaml.full_load(fp)
+        memory_pool = self._load_memory_pool(mem_pool_path)
 
         if memory_pool is not None:
             for instance in memory_pool:
@@ -180,8 +189,7 @@ class CactiParser:
                 cacti_top_path,
             )
 
-        with open(mem_pool_path, "r", encoding="UTF-8") as fp:
-            memory_pool: None | dict[str, dict[str, Any]] = yaml.full_load(fp)
+        memory_pool = self._load_memory_pool(mem_pool_path)
 
         if memory_pool is not None:
             for instance in memory_pool:
